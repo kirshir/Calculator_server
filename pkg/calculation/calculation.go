@@ -1,8 +1,6 @@
 package calculation
 
 import (
-	"errors"
-	"fmt"
 	"strconv"
 	"unicode"
 )
@@ -47,12 +45,12 @@ func opn(expression string) ([]string, error) {
 					stack = stack[:len(stack)-1]
 				}
 				if len(stack) == 0 {
-					return nil, errors.New("invalid input of brackets")
+					return nil, ErrInvalidBrackets
 				}
 				stack = stack[:len(stack)-1]
 			default:
 				if !unicode.IsSpace(char) {
-					return nil, fmt.Errorf("invalid character %c", char)
+					return nil, ErrInvalidCharacter
 				}
 			}
 		}
@@ -62,7 +60,7 @@ func opn(expression string) ([]string, error) {
 	}
 	for len(stack) > 0 {
 		if stack[len(stack)-1] == "(" {
-			return nil, errors.New("invalid input of brackets")
+			return nil, ErrInvalidBrackets
 		}
 		output = append(output, stack[len(stack)-1])
 		stack = stack[:len(stack)-1]
@@ -75,7 +73,7 @@ func calculateOPN(opn []string) (float64, error) {
 	for _, char := range opn {
 		if char == "+" || char == "-" || char == "*" || char == "/" {
 			if len(stack) < 2 {
-				return 0, errors.New("incorrect expression")
+				return 0, ErrInvalidExpression
 			}
 			b := stack[len(stack)-1]
 			a := stack[len(stack)-2]
@@ -90,7 +88,7 @@ func calculateOPN(opn []string) (float64, error) {
 				result = a * b
 			case "/":
 				if b == 0 {
-					return 0, errors.New("division by 0")
+					return 0, ErrDivisonByZero
 				}
 				result = a / b
 			}
@@ -98,13 +96,13 @@ func calculateOPN(opn []string) (float64, error) {
 		} else {
 			num, err := strconv.ParseFloat(char, 64)
 			if err != nil {
-				return 0, fmt.Errorf("inappropriate number %s", char)
+				return 0, ErrInvalidExpression
 			}
 			stack = append(stack, num)
 		}
 	}
 	if len(stack) != 1 {
-		return 0, errors.New("incorrect expression")
+		return 0, ErrInvalidExpression
 	}
 	return stack[0], nil
 
